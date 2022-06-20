@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\yiqin\source\repos\VulkanPractice\CMakeFiles\92245537a7786aa99195a5d5ce2abbb3\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{EFE040BE-9719-3BAF-90B4-D4114DDE403E}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
