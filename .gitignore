@@ -2,6 +2,7 @@
 ## Generated CMake build results
 *.sln
 *.vcxproj*
+CMakeFiles/*
 
 ## CMake files
 CMakeLists.txt.user

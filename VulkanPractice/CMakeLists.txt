@@ -13,8 +13,13 @@ foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${PROJECT_LIBRARY_DIR})
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
-# Add source to this project's executable.
-add_executable (VulkanPractice "VulkanPractice.cpp" "VulkanPractice.h")
+
+include_directories("include")
+
+file(GLOB SOURCES
+    src/main.cpp
+)
+add_executable(VulkanPractice ${SOURCES})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanPractice PROPERTY CXX_STANDARD 20)
