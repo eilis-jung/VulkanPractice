@@ -19,7 +19,12 @@ include_directories("include")
 file(GLOB SOURCES
     src/main.cpp
 )
-add_executable(VulkanPractice ${SOURCES})
+file(GLOB HEADERS
+    include/base/*.h
+)
+add_executable(VulkanPractice ${SOURCES} ${HEADERS})
+add_dependencies(VulkanPractice glfw)
+target_link_libraries(VulkanPractice ${Vulkan_LIBRARY} ${GLFW_LIBRARY})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanPractice PROPERTY CXX_STANDARD 20)

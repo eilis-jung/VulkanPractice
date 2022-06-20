@@ -14,6 +14,14 @@ include_directories("external/vulkan/include")
 set(PROJECT_BINARY_DIR ${PROJECT_SOURCE_DIR}/bin)
 set(PROJECT_LIBRARY_DIR ${PROJECT_SOURCE_DIR}/libs)
 
+find_library(Vulkan_LIBRARY NAMES vulkan-1 vulkan PATHS ${CMAKE_SOURCE_DIR}/libs/vulkan)
+IF (Vulkan_LIBRARY)
+    set(Vulkan_FOUND ON)
+    MESSAGE("Using bundled Vulkan library version")
+ENDIF()
+
+set(GLFW_LIBRARY ${CMAKE_SOURCE_DIR}/libs/glfw/glfw3.lib)
+
 # Include sub-projects.
 add_subdirectory ("VulkanPractice")
 add_subdirectory("external")
