@@ -140,5 +140,5 @@ bool VkPractice::VkInstanceWrapper::checkValidationLayers()
 VkPractice::VkInstanceWrapper::~VkInstanceWrapper()
 {
     vkDestroyInstance(m_instance, nullptr);
-    delete m_createInfo.pApplicationInfo;
+    //delete m_createInfo.pApplicationInfo;
 }

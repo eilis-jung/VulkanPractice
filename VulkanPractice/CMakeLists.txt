@@ -17,7 +17,8 @@ endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 include_directories("include")
 
 file(GLOB SOURCES
-    src/main.cpp
+    src/*.cpp
+    src/base/*.cpp
 )
 file(GLOB HEADERS
     include/base/*.h
