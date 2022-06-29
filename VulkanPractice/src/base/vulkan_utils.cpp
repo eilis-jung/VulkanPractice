@@ -38,6 +38,8 @@ void VkPractice::VkInstanceWrapper::init()
     if (vkCreateInstance(&m_createInfo, nullptr, &m_instance) != VK_SUCCESS) {
         throw std::runtime_error("failed to create instance!");
     }
+    setupPhysicalDevice();
+    setupLogicalDevice();
 }
 
 VkApplicationInfo* VkPractice::VkInstanceWrapper::initAppInfo()
@@ -101,7 +103,17 @@ void VkPractice::VkInstanceWrapper::initValidationLayers()
 
     if (enableValidationLayers) {
         m_createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-        m_createInfo.ppEnabledLayerNames = validationLayers.data();
+
+        // Put validationLayers names into heap
+        char** layerNames = new char* [validationLayers.size()];
+        for (int i = 0; i < validationLayers.size(); i++) {
+            layerNames[i] = new char[strlen(validationLayers.data()[i]) + 1];
+            strcpy(layerNames[i], validationLayers.data()[i]);
+            const_cast<const char*>(layerNames[i]);
+        }
+        const_cast<const char* const*>(layerNames);
+        m_createInfo.ppEnabledLayerNames = layerNames;
+        // =====================================
     }
     else {
         m_createInfo.enabledLayerCount = 0;
@@ -137,8 +149,95 @@ bool VkPractice::VkInstanceWrapper::checkValidationLayers()
     return true;
 }
 
+void VkPractice::VkInstanceWrapper::setupPhysicalDevice()
+{
+    
+    uint32_t deviceCount = 0;
+    vkEnumeratePhysicalDevices(m_instance, &deviceCount, nullptr);
+
+    if (deviceCount == 0) {
+        throw std::runtime_error("failed to find GPUs with Vulkan support!");
+    }
+
+    std::vector<VkPhysicalDevice> devices(deviceCount);
+    vkEnumeratePhysicalDevices(m_instance, &deviceCount, devices.data());
+
+    for (auto& device : devices) {
+        if (checkPhysicalDevice(device)) {
+            m_physicalDevice = device;
+            break;
+        }
+    }
+
+    if (m_physicalDevice == VK_NULL_HANDLE) {
+        throw std::runtime_error("failed to find a suitable GPU!");
+    }
+}
+
+bool VkPractice::VkInstanceWrapper::checkPhysicalDevice(VkPhysicalDevice & device)
+{
+    return true;
+}
+
+void VkPractice::VkInstanceWrapper::setupLogicalDevice()
+{
+    
+    QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
+
+    VkDeviceQueueCreateInfo queueCreateInfo{};
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+    queueCreateInfo.queueCount = 1;
+    float queuePriority = 1.0f;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+
+    VkPhysicalDeviceFeatures deviceFeatures{};
+    VkDeviceCreateInfo deviceCreateInfo{};
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
+    deviceCreateInfo.queueCreateInfoCount = 1;
+
+    deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+    deviceCreateInfo.enabledExtensionCount = 0;
+
+    if (vkCreateDevice(m_physicalDevice, &deviceCreateInfo, nullptr, &m_logicalDevice) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create logical device!");
+    }
+
+    vkGetDeviceQueue(m_logicalDevice, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
+}
+
+VkPractice::QueueFamilyIndices VkPractice::VkInstanceWrapper::findQueueFamilies(VkPhysicalDevice& device)
+{
+    QueueFamilyIndices indices;
+
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    int i = 0;
+    for (const auto& queueFamily : queueFamilies) {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            indices.graphicsFamily = i;
+        }
+
+        if (indices.isComplete()) {
+            break;
+        }
+
+        i++;
+    }
+
+    return indices;
+}
+
 VkPractice::VkInstanceWrapper::~VkInstanceWrapper()
 {
+    vkDestroyDevice(m_logicalDevice, nullptr);
     vkDestroyInstance(m_instance, nullptr);
-    //delete m_createInfo.pApplicationInfo;
+    
+    delete m_createInfo.pApplicationInfo;
+    delete m_createInfo.ppEnabledLayerNames; // ppEnabledLayerNames is a pointer to heap
 }

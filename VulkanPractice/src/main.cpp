@@ -15,7 +15,6 @@ public:
         m_window.init();
         initVulkan();
         mainLoop();
-        cleanup();
     }
 
 private:
@@ -30,9 +29,6 @@ private:
 
     void mainLoop() {
         m_window.loop();
-    }
-
-    void cleanup() {
     }
 };
 
