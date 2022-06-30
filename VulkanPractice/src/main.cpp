@@ -24,7 +24,7 @@ private:
     VkInstance instance;
 
     void initVulkan() {
-        m_vkInstance.init();
+        m_vkInstance.init(m_window);
     }
 
     void mainLoop() {

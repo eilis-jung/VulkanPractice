@@ -19,6 +19,9 @@ namespace VkPractice {
 		}
 		bool init();
 		void loop();
+		GLFWwindow* getPointer() {
+			return m_window;
+		}
 		~Window();
 	private:
 		GLFWwindow* m_window;
@@ -41,6 +44,7 @@ namespace VkPractice {
 		VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 		VkDevice m_logicalDevice;
 		VkQueue m_graphicsQueue;
+		VkSurfaceKHR m_surface;
 
 		// AppInfo setup
 		VkApplicationInfo* initAppInfo();
@@ -61,13 +65,13 @@ namespace VkPractice {
 		bool checkPhysicalDevice(VkPhysicalDevice & device);
 		void setupLogicalDevice();
 
+		// Window surface setup
+		void setupWindowSurface(Window & window);
 
 
 	public:
 		VkInstanceWrapper();
-		void init();
-
-
+		void init(Window& window);
 		~VkInstanceWrapper();
 	};
 }

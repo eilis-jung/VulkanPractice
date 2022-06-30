@@ -27,7 +27,7 @@ VkPractice::VkInstanceWrapper::VkInstanceWrapper() {
 
 }
 
-void VkPractice::VkInstanceWrapper::init()
+void VkPractice::VkInstanceWrapper::init(Window& window)
 {
     m_createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     m_createInfo.pApplicationInfo = initAppInfo();
@@ -38,6 +38,8 @@ void VkPractice::VkInstanceWrapper::init()
     if (vkCreateInstance(&m_createInfo, nullptr, &m_instance) != VK_SUCCESS) {
         throw std::runtime_error("failed to create instance!");
     }
+
+    setupWindowSurface(window);
     setupPhysicalDevice();
     setupLogicalDevice();
 }
@@ -207,6 +209,13 @@ void VkPractice::VkInstanceWrapper::setupLogicalDevice()
     vkGetDeviceQueue(m_logicalDevice, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
 }
 
+void VkPractice::VkInstanceWrapper::setupWindowSurface(Window& window)
+{
+    if (glfwCreateWindowSurface(m_instance, window.getPointer(), nullptr, &m_surface) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create window surface!");
+    }
+}
+
 VkPractice::QueueFamilyIndices VkPractice::VkInstanceWrapper::findQueueFamilies(VkPhysicalDevice& device)
 {
     QueueFamilyIndices indices;
@@ -235,6 +244,7 @@ VkPractice::QueueFamilyIndices VkPractice::VkInstanceWrapper::findQueueFamilies(
 
 VkPractice::VkInstanceWrapper::~VkInstanceWrapper()
 {
+    vkDestroySurfaceKHR(m_instance, m_surface, nullptr);
     vkDestroyDevice(m_logicalDevice, nullptr);
     vkDestroyInstance(m_instance, nullptr);
     
