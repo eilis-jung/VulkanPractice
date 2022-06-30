@@ -1,5 +1,5 @@
 #pragma once
-
+#define NOMINMAX // For using max() in numeric_limits
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <memory>
@@ -7,6 +7,8 @@
 #include <optional>
 #include <set>
 #include <iostream>
+#include <limits>
+#include <algorithm>
 
 #include <base/const.h>
 #include <base/window.h>
@@ -21,6 +23,12 @@ namespace VkPractice {
 		}
 	};
 
+	struct SwapChainSupportDetails {
+		VkSurfaceCapabilitiesKHR capabilities;
+		std::vector<VkSurfaceFormatKHR> formats;
+		std::vector<VkPresentModeKHR> presentModes;
+	};
+
 	class VkInstanceWrapper {
 	private:
 		VkInstance m_instance;
@@ -30,6 +38,12 @@ namespace VkPractice {
 		VkQueue m_graphicsQueue;
 		VkQueue m_presentQueue;
 		VkSurfaceKHR m_surface;
+
+		VkSwapchainKHR m_swapChain;
+		std::vector<VkImage> m_swapChainImages;
+		std::vector<VkImageView> m_swapChainImageViews;
+		VkFormat m_swapChainImageFormat;
+		VkExtent2D m_swapChainExtent;
 
 		// AppInfo setup
 		VkApplicationInfo* initAppInfo();
@@ -52,6 +66,16 @@ namespace VkPractice {
 
 		// Window surface setup
 		void setupWindowSurface(Window & window);
+
+		// Swapchain setup
+		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice & device);
+		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
+		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
+		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, Window& window);
+		void setupSwapChain(Window& window);
+
+		// ImageView setup
+		void setupImageViews();
 
 
 	public:

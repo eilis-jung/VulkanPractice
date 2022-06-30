@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stdint.h";
+#include <cstdint>
 
 namespace VkPractice {
 	const uint32_t WIN_INITIAL_WIDTH = 800;
