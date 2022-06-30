@@ -2,38 +2,22 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include <base/const.h>
 #include <memory>
 #include <vector>
 #include <optional>
+#include <set>
 #include <iostream>
 
+#include <base/const.h>
+#include <base/window.h>
+
 namespace VkPractice {
-
-	class Window {
-	public:
-		Window() :
-			m_width(VkPractice::WIN_INITIAL_WIDTH),
-			m_height(VkPractice::WIN_INITIAL_HEIGHT),
-			m_window(nullptr) {
-		}
-		bool init();
-		void loop();
-		GLFWwindow* getPointer() {
-			return m_window;
-		}
-		~Window();
-	private:
-		GLFWwindow* m_window;
-		uint32_t m_width;
-		uint32_t m_height;
-	};
-
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
+		std::optional<uint32_t> presentFamily;
 
 		bool isComplete() {
-			return graphicsFamily.has_value();
+			return graphicsFamily.has_value() && presentFamily.has_value();
 		}
 	};
 
@@ -44,6 +28,7 @@ namespace VkPractice {
 		VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 		VkDevice m_logicalDevice;
 		VkQueue m_graphicsQueue;
+		VkQueue m_presentQueue;
 		VkSurfaceKHR m_surface;
 
 		// AppInfo setup

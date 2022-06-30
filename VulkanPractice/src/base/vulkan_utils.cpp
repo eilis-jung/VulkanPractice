@@ -1,33 +1,10 @@
 #include <base/vulkan_utils.h>
 
-bool VkPractice::Window::init() {
-	glfwInit();
-
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-	m_window = glfwCreateWindow(m_width, m_height, "VulkanPractice", nullptr, nullptr);
-
-	if (m_window != nullptr) return true;
-	return false;
-}
-
-void VkPractice::Window::loop() {
-	while (!glfwWindowShouldClose(m_window)) {
-		glfwPollEvents();
-	}
-}
-
-VkPractice::Window::~Window() {
-	glfwDestroyWindow(m_window);
-    glfwTerminate();
-}
-
 VkPractice::VkInstanceWrapper::VkInstanceWrapper() {
 
 }
 
-void VkPractice::VkInstanceWrapper::init(Window& window)
+void VkPractice::VkInstanceWrapper::init(VkPractice::Window& window)
 {
     m_createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     m_createInfo.pApplicationInfo = initAppInfo();
@@ -186,18 +163,26 @@ void VkPractice::VkInstanceWrapper::setupLogicalDevice()
     
     QueueFamilyIndices indices = findQueueFamilies(m_physicalDevice);
 
-    VkDeviceQueueCreateInfo queueCreateInfo{};
-    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-    queueCreateInfo.queueCount = 1;
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
     float queuePriority = 1.0f;
-    queueCreateInfo.pQueuePriorities = &queuePriority;
+    for (uint32_t queueFamily : uniqueQueueFamilies) {
+        VkDeviceQueueCreateInfo queueCreateInfo{};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = queueFamily;
+        queueCreateInfo.queueCount = 1;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+        queueCreateInfos.push_back(queueCreateInfo);
+    }
+
 
     VkPhysicalDeviceFeatures deviceFeatures{};
     VkDeviceCreateInfo deviceCreateInfo{};
     deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    deviceCreateInfo.pQueueCreateInfos = &queueCreateInfo;
-    deviceCreateInfo.queueCreateInfoCount = 1;
+    
+    deviceCreateInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+    deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
 
     deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
     deviceCreateInfo.enabledExtensionCount = 0;
@@ -207,6 +192,7 @@ void VkPractice::VkInstanceWrapper::setupLogicalDevice()
     }
 
     vkGetDeviceQueue(m_logicalDevice, indices.graphicsFamily.value(), 0, &m_graphicsQueue);
+    vkGetDeviceQueue(m_logicalDevice, indices.presentFamily.value(), 0, &m_presentQueue);
 }
 
 void VkPractice::VkInstanceWrapper::setupWindowSurface(Window& window)
@@ -226,12 +212,17 @@ VkPractice::QueueFamilyIndices VkPractice::VkInstanceWrapper::findQueueFamilies(
     std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
     vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
+
     int i = 0;
     for (const auto& queueFamily : queueFamilies) {
         if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphicsFamily = i;
         }
-
+        VkBool32 presentSupport = false;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface, &presentSupport);
+        if (presentSupport) {
+            indices.presentFamily = i;
+        }
         if (indices.isComplete()) {
             break;
         }
