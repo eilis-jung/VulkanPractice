@@ -1,3 +1,7 @@
+## Generated shader files
+VulkanPractice/include/shaders/
+VulkanPractice/shaders/generated/
+
 .vs/
 ## Generated CMake build results
 *.sln

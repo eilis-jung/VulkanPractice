@@ -13,7 +13,7 @@ foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${PROJECT_LIBRARY_DIR})
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
-
+set(PROJECT_HEADER_DIRECTORY "include")
 include_directories("include")
 
 file(GLOB SOURCES
@@ -31,15 +31,11 @@ file(GLOB SHADERS_HLSL "${SHADER_DIR_HLSL}/*.vert" "${SHADER_DIR_HLSL}/*.frag" "
 source_group("Shaders\\GLSL" FILES ${SHADERS_GLSL})
 source_group("Shaders\\HLSL" FILES ${SHADERS_HLSL})
 
-add_executable(VulkanPractice ${SOURCES} ${HEADERS} ${SHADERS_GLSL} ${SHADERS_HLSL})
-add_dependencies(VulkanPractice glfw)
-target_link_libraries(VulkanPractice ${Vulkan_LIBRARY} ${GLFW_LIBRARY})
-
 # Compile shaders
-
 include(${PROJECT_SOURCE_DIR}/cmake/compile_shader.cmake)
 
 set(GENERATED_SHADER_FOLDER "shaders/generated")
+set(GENERATED_SHADER_HEADER_DIRECTORY "${PROJECT_HEADER_DIRECTORY}/shaders")
 if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_SHADER_FOLDER})
   file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_SHADER_FOLDER})
 endif()
@@ -51,14 +47,18 @@ endif()
 set(glslangValidator_executable "C:/VulkanSDK/1.3.216.0/Bin/glslangValidator.exe")
 set(TARGET_NAME "ShadersCompile")
 
-
-
 compile_shader(
   "${SHADERS_GLSL}"
   "${TARGET_NAME}"
   "${CMAKE_CURRENT_SOURCE_DIR}/include"
   "${GENERATED_SHADER_FOLDER}"
+  ${GENERATED_SHADER_HEADER_DIRECTORY}
   "${glslangValidator_executable}")
+
+
+add_executable(VulkanPractice ${SOURCES} ${HEADERS} ${SHADERS_GLSL} ${SHADERS_HLSL})
+add_dependencies(VulkanPractice glfw ShadersCompile)
+target_link_libraries(VulkanPractice ${Vulkan_LIBRARY} ${GLFW_LIBRARY})
 
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
