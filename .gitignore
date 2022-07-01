@@ -3,7 +3,7 @@
 *.sln
 *.vcxproj*
 CMakeFiles/*
-out/*
+out/
 
 ## CMake files
 CMakeLists.txt.user
