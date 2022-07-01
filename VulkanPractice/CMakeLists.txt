@@ -35,9 +35,18 @@ add_executable(VulkanPractice ${SOURCES} ${HEADERS} ${SHADERS_GLSL} ${SHADERS_HL
 add_dependencies(VulkanPractice glfw)
 target_link_libraries(VulkanPractice ${Vulkan_LIBRARY} ${GLFW_LIBRARY})
 
+# Compile shaders
+
+include(${PROJECT_SOURCE_DIR}/cmake/compile_shader.cmake)
+
+compile_shader(
+  "${SHADER_FILES}"
+  "${TARGET_NAME}"
+  "${SHADER_INCLUDE_FOLDER}"
+  "${GENERATED_SHADER_FOLDER}"
+  "${glslangValidator_executable}")
+
+
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET VulkanPractice PROPERTY CXX_STANDARD 20)
 endif()
-
-
-# TODO: Add tests and install targets if needed.
