@@ -5,6 +5,8 @@ function(compile_shader SHADERS TARGET_NAME SHADER_INCLUDE_FOLDER GENERATED_DIR 
     set(ALL_GENERATED_SPV_FILES "")
     set(ALL_GENERATED_CPP_FILES "")
 
+    
+
     if(UNIX)
         execute_process(COMMAND chmod a+x ${GLSLANG_BIN})
     endif()
@@ -18,9 +20,10 @@ function(compile_shader SHADERS TARGET_NAME SHADER_INCLUDE_FOLDER GENERATED_DIR 
         set(SPV_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_DIR}/spv/${SHADER_NAME}.spv")
         set(CPP_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_DIR}/cpp/${HEADER_NAME}.h")
 
+        MESSAGE("${GLSLANG_BIN} -I ${SHADER_INCLUDE_FOLDER} -V100 -o ${SPV_FILE} ${SHADER}")
         add_custom_command(
             OUTPUT ${SPV_FILE}
-            COMMAND ${GLSLANG_BIN} -I${SHADER_INCLUDE_FOLDER} -V100 -o ${SPV_FILE} ${SHADER}
+            COMMAND ${GLSLANG_BIN} -I ${SHADER_INCLUDE_FOLDER} -V100 -o ${SPV_FILE} ${SHADER}
             DEPENDS ${SHADER}
             WORKING_DIRECTORY "${working_dir}")
 

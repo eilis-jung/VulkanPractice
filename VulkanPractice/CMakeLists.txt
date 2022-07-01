@@ -24,9 +24,9 @@ file(GLOB HEADERS
     include/base/*.h
 )
 # Add shaders
-set(SHADER_DIR_GLSL "shaders/glsl/")
+set(SHADER_DIR_GLSL "shaders/glsl")
 file(GLOB SHADERS_GLSL "${SHADER_DIR_GLSL}/*.vert" "${SHADER_DIR_GLSL}/*.frag" "${SHADER_DIR_GLSL}/*.comp" "${SHADER_DIR_GLSL}/*.geom" "${SHADER_DIR_GLSL}/*.tesc" "${SHADER_DIR_GLSL}/*.tese" "${SHADER_DIR_GLSL}/*.mesh" "${SHADER_DIR_GLSL}/*.task" "${SHADER_DIR_GLSL}/*.rgen" "${SHADER_DIR_GLSL}/*.rchit" "${SHADER_DIR_GLSL}/*.rmiss" "${SHADER_DIR_GLSL}/*.rcall")
-set(SHADER_DIR_HLSL "shaders/hlsl/")
+set(SHADER_DIR_HLSL "shaders/hlsl")
 file(GLOB SHADERS_HLSL "${SHADER_DIR_HLSL}/*.vert" "${SHADER_DIR_HLSL}/*.frag" "${SHADER_DIR_HLSL}/*.comp" "${SHADER_DIR_HLSL}/*.geom" "${SHADER_DIR_HLSL}/*.tesc" "${SHADER_DIR_HLSL}/*.tese" "${SHADER_DIR_HLSL}/*.mesh" "${SHADER_DIR_HLSL}/*.task" "${SHADER_DIR_HLSL}/*.rgen" "${SHADER_DIR_HLSL}/*.rchit" "${SHADER_DIR_HLSL}/*.rmiss" "${SHADER_DIR_HLSL}/*.rcall")
 source_group("Shaders\\GLSL" FILES ${SHADERS_GLSL})
 source_group("Shaders\\HLSL" FILES ${SHADERS_HLSL})
@@ -39,10 +39,24 @@ target_link_libraries(VulkanPractice ${Vulkan_LIBRARY} ${GLFW_LIBRARY})
 
 include(${PROJECT_SOURCE_DIR}/cmake/compile_shader.cmake)
 
+set(GENERATED_SHADER_FOLDER "shaders/generated")
+if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_SHADER_FOLDER})
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_SHADER_FOLDER})
+endif()
+
+if (NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_SHADER_FOLDER}/spv)
+  file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${GENERATED_SHADER_FOLDER}/spv)
+endif()
+
+set(glslangValidator_executable "C:/VulkanSDK/1.3.216.0/Bin/glslangValidator.exe")
+set(TARGET_NAME "ShadersCompile")
+
+
+
 compile_shader(
-  "${SHADER_FILES}"
+  "${SHADERS_GLSL}"
   "${TARGET_NAME}"
-  "${SHADER_INCLUDE_FOLDER}"
+  "${CMAKE_CURRENT_SOURCE_DIR}/include"
   "${GENERATED_SHADER_FOLDER}"
   "${glslangValidator_executable}")
 
