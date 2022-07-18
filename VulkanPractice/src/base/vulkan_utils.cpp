@@ -362,6 +362,60 @@ void VkPractice::VkInstanceWrapper::setupImageViews()
     }
 }
 
+void VkPractice::VkInstanceWrapper::createShaders()
+{
+    VkShaderModule vertShaderModule = VkUtils::createShaderModule(m_logicalDevice, SHADER_VERT);
+    VkShaderModule fragShaderModule = VkUtils::createShaderModule(m_logicalDevice, SHADER_FRAG);
+
+    // Assign shaders into stages
+    VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
+    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+    vertShaderStageInfo.module = vertShaderModule;
+    vertShaderStageInfo.pName = "main";
+    vertShaderStageInfo.pSpecializationInfo = nullptr; // Customized constants in shader
+
+    VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
+    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+    fragShaderStageInfo.module = fragShaderModule;
+    fragShaderStageInfo.pName = "main";
+    fragShaderStageInfo.pSpecializationInfo = nullptr; // Customized constants in shader
+
+    VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
+
+    // Destroy shader modules
+    vkDestroyShaderModule(m_logicalDevice, fragShaderModule, nullptr);
+    vkDestroyShaderModule(m_logicalDevice, vertShaderModule, nullptr);
+}
+
+void VkPractice::VkInstanceWrapper::setupFixedFunctions()
+{
+    // Vertex input
+    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+    vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    vertexInputInfo.vertexBindingDescriptionCount = 0;
+    vertexInputInfo.pVertexBindingDescriptions = nullptr; // pointer to vertex binding, i.e. spacing between data and whether the data is per-vertex or per-instance
+    vertexInputInfo.vertexAttributeDescriptionCount = 0;
+    vertexInputInfo.pVertexAttributeDescriptions = nullptr; // pointer to vertex attribute desc, i.e. type of the attributes passed to the vertex shader, which binding to load them from and at which offset
+
+    // Input assembly
+    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+    inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+    // Viewports and scissors
+    VkViewport viewport{};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = (float)m_swapChainExtent.width;
+    viewport.height = (float)m_swapChainExtent.height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+
+}
+
 VkPractice::QueueFamilyIndices VkPractice::VkInstanceWrapper::findQueueFamilies(VkPhysicalDevice& device)
 {
     QueueFamilyIndices indices;
@@ -405,4 +459,19 @@ VkPractice::VkInstanceWrapper::~VkInstanceWrapper()
     
     delete m_createInfo.pApplicationInfo;
     delete m_createInfo.ppEnabledLayerNames; // ppEnabledLayerNames is a pointer to heap
+}
+
+VkShaderModule VkPractice::VkUtils::createShaderModule(VkDevice& device, const std::vector<unsigned char>& shader_code)
+{
+    VkShaderModuleCreateInfo shaderModuleCreateInfo{};
+    shaderModuleCreateInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    shaderModuleCreateInfo.codeSize = shader_code.size();
+    shaderModuleCreateInfo.pCode = reinterpret_cast<const uint32_t*>(shader_code.data());
+
+    VkShaderModule shader_module;
+    if (vkCreateShaderModule(device, &shaderModuleCreateInfo, nullptr, &shader_module) != VK_SUCCESS)
+    {
+        return VK_NULL_HANDLE;
+    }
+    return shader_module;
 }

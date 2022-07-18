@@ -13,6 +13,11 @@
 #include <base/const.h>
 #include <base/window.h>
 
+// Shaders
+#include <shaders/shader_vert.h>
+#include <shaders/shader_frag.h>
+
+
 namespace VkPractice {
 	struct QueueFamilyIndices {
 		std::optional<uint32_t> graphicsFamily;
@@ -27,6 +32,11 @@ namespace VkPractice {
 		VkSurfaceCapabilitiesKHR capabilities;
 		std::vector<VkSurfaceFormatKHR> formats;
 		std::vector<VkPresentModeKHR> presentModes;
+	};
+
+	class VkUtils {
+	public:
+		static VkShaderModule createShaderModule(VkDevice & device, const std::vector<unsigned char>& shader_code);
 	};
 
 	class VkInstanceWrapper {
@@ -77,6 +87,9 @@ namespace VkPractice {
 		// ImageView setup
 		void setupImageViews();
 
+		// Pipeline setup
+		void createShaders();
+		void setupFixedFunctions();
 
 	public:
 		VkInstanceWrapper();
